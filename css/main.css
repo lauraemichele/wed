@@ -506,25 +506,13 @@ body.preloader-site {
 .btn-cta:hover {
   color: white;
   background-color: #800020;
-  font-size: 1.2rem;
-  border-radius: 10px;
-  border: 2px solid #800020;
-  width: 210px;
-  height: 65px;
-  align-items: center;
-  margin: 1rem;
 }
 
 .btn-cta {
   background-color: #800020;
-  width: 210px;
-  height: 65px;
   color: white;
-  font-size: 1.2rem;
   border: 2px solid #800020;
   border-radius: 10px;
-  align-items: center;
-  margin: 1rem;
 }
 
 .cashbac-logo-inline {

@@ -18,7 +18,7 @@
   <!-- <link rel="stylesheet" href="https://unpkg.com/bulma@0.8.0/css/bulma.min.css" /> -->
   <link rel="stylesheet" href="https://unpkg.com/bulma@0.9.4/css/bulma.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
-  
+
   <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" /> -->
   <link rel="stylesheet" href="https://unpkg.com/bulma-tooltip@0.1.5/dist/bulma-tooltip.min.css" />
   <link rel="stylesheet" type="text/css" href="css/rsvp.css" />
@@ -254,11 +254,22 @@
         </div>
       </div>
       <div class="space40px"></div>
-      <div class="main-content has-text-centered" data-aos="fade-up" data-aos-easing="linear">
-        <a href="https://calendar.google.com/event?action=TEMPLATE..." target="_blank" class="button has-tooltip btn-cta" data-tooltip="Add to Calendar" target="_blank" data-aos="zoom-in">
-          <i class="far fa-calendar-plus"></i>
-          &nbsp;&nbsp;Google Calendar
-        </a>
+      <div class="main-content has-text-centered">
+        <p class="is-size-5 mb-4" data-aos="fade-up" data-aos-easing="linear">Aggiungi al calendario</p>
+        <div class="buttons is-centered" data-aos="fade-up" data-aos-easing="linear">
+          <a href="#" target="_blank" class="button btn-cta">
+            <i class="fab fa-google"></i>
+            &nbsp;&nbsp;Google
+          </a>
+          <a href="#" target="_blank" class="button btn-cta">
+            <i class="fab fa-microsoft"></i>
+            &nbsp;&nbsp;Outlook
+          </a>
+          <a href="#" target="_blank" class="button btn-cta">
+            <i class="fab fa-apple"></i>
+            &nbsp;&nbsp;Apple
+          </a>
+        </div>
       </div>
       <div class="column has-text-centered is-12 prolog">
         <span class="space40px"></span>
@@ -430,21 +441,17 @@
 
     <!-- Begin RSVP Content -->
     <section class="section-darker rsvp is-fullheight" id="rsvp">
-      <div id="rsvp-modal" class="modal fade" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-          <div class="modal-content">
-            <div class="modal-body">
-              <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span>
-              </button>
-              <div class="section-padding">
-                <h3>Grazie!</h3>
-                <p>Siamo felici di sapere che sarai con noi nel nostro grande giorno.</p>
-                <div id="add-to-cal"></div>
-              </div>
-            </div>
-          </div><!-- /.modal-content -->
-        </div><!-- /.modal-dialog -->
-      </div><!-- /.modal -->
+      <div id="rsvp-modal" class="modal">
+        <div class="modal-background"></div>
+        <div class="modal-content">
+          <div class="box">
+            <h3 class="title is-4">Grazie!</h3>
+            <p>Siamo felici di sapere che sarai con noi nel nostro grande giorno.</p>
+            <div id="add-to-cal"></div>
+          </div>
+        </div>
+        <button class="modal-close is-large" aria-label="close"></button>
+      </div>
 
       <div class="container">
         <div class="columns is-multiline">
@@ -460,8 +467,8 @@
         </div>
         <div class="columns is-multiline">
           <div class="column is-12">
-            <div class="columns is-centered is-vcentered" >
-              <div class="column is-mobile is-10 is-offset-1">
+            <div class="columns is-centered is-vcentered">
+              <div class="column is-mobile is-10 is-offset-0">
                 <form id="rsvp-form" class="rsvp-form" action="" method="POST">
                   <div class="columns">
                     <div class="column">
@@ -488,6 +495,9 @@
                     </div>
                   </div>
                   <div class="field has-text-centered">
+                    <div class="column is-12" id="alert-wrapper"></div>
+                  </div>
+                  <div class="field has-text-centered">
                     <button type="submit" class="button btn-fill btn-cta">Sì, confermo!</button>
                   </div>
 
@@ -500,7 +510,7 @@
         <div class="space40px"></div>
 
         <div class="space40px"></div>
-        <div class="has-text-centered" data-aos="fade-up" data-aos-easing="linear">
+        <div class="has-text-centered">
           <img src="image/divider-leaves.png" class="divider has-text-centered" alt="~~~">
         </div>
         <div class="space40px"></div>

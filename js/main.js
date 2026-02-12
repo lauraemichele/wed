@@ -1,4 +1,26 @@
-// Get that hamburger menu cookin' //
+function openModal($el) {
+  $el.classList.add('is-active');
+}
+
+function closeModal($el) {
+  $el.classList.remove('is-active');
+}
+
+function closeAllModals() {
+  (document.querySelectorAll('.modal') || []).forEach(($modal) => {
+    closeModal($modal);
+  });
+}
+
+
+// Add a keyboard event to close all modals
+document.addEventListener('keydown', (event) => {
+  const e = event || window.event;
+
+  if (e.keyCode === 27) { // Escape key
+    closeAllModals();
+  }
+});
 
 document.addEventListener("DOMContentLoaded", function () {
   // Get all "navbar-burger" elements
@@ -20,10 +42,76 @@ document.addEventListener("DOMContentLoaded", function () {
       });
     });
   }
+
+  // Add a click event on various child elements to close the parent modal
+  (document.querySelectorAll('.modal-background, .modal-close, .modal-card-head .delete, .modal-card-foot .button') || []).forEach(($close) => {
+    const $target = $close.closest('.modal');
+
+    $close.addEventListener('click', () => {
+      closeModal($target);
+    });
+  });
+
 });
 
-// Smooth Anchor Scrolling
-$(document).on("click", 'a[href^="#"]', function (event) {
+// Calendar Event URLs
+function generateCalendarLinks() {
+  const eventTitle = "Matrimonio Laura e Michele";
+  const eventLocation = "Parrocchia Sacra Famiglia, Strada Vaciglio Centro 280, Modena";
+  const startDateTime = "2026-09-26T15:30:00";
+  const endDateTime = "2026-09-26T18:00:00";
+  const eventNotes = "Sito web: https://lauraemichele.netlify.app\n\nPer maggiori dettagli visita il sito web del matrimonio.";
+
+  // Google Calendar
+  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=20260926T153000Z/20260926T180000Z&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(eventNotes)}`;
+
+  // Outlook
+  const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&startdt=${startDateTime}&enddt=${endDateTime}&location=${encodeURIComponent(eventLocation)}&body=${encodeURIComponent(eventNotes)}`;
+
+  // Apple Calendar - Generate ICS file for better iOS compatibility
+  function generateICS() {
+    const icsContent = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Laura e Michele//Wedding//EN
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:${eventTitle}
+X-WR-TIMEZONE:Europe/Rome
+BEGIN:VEVENT
+UID:matrimonio-laura-michele@lauraemichele.netlify.app
+DTSTAMP:20260926T153000Z
+DTSTART:20260926T153000Z
+DTEND:20260926T180000Z
+SUMMARY:${eventTitle}
+LOCATION:${eventLocation}
+DESCRIPTION:${eventNotes}
+STATUS:CONFIRMED
+SEQUENCE:0
+END:VEVENT
+END:VCALENDAR`;
+
+    const blob = new Blob([icsContent], { type: 'text/calendar' });
+    const url = URL.createObjectURL(blob);
+    return url;
+  }
+
+  // Assign URLs to links
+  document.querySelectorAll('.buttons a.btn-cta').forEach((link) => {
+    if (link.querySelector('.fa-google')) {
+      link.href = googleUrl;
+    } else if (link.querySelector('.fa-microsoft')) {
+      link.href = outlookUrl;
+    } else if (link.querySelector('.fa-apple')) {
+      link.href = generateICS();
+      link.download = 'matrimonio-laura-michele.ics';
+    }
+  });
+}
+
+// Initialize calendar links on page load
+document.addEventListener("DOMContentLoaded", function () {
+  generateCalendarLinks();
+
   event.preventDefault();
   $("html, body").animate(
     {
@@ -46,6 +134,12 @@ function scrollFunction() {
   }
 }
 
+function alert_markup(alert_type, msg) {
+  return '<div class="notification is-' + alert_type + '">' + msg + '<button class="delete"></button></div>';
+}
+
+
+
 // Preloader
 $(document).ready(function ($) {
   $(".preloader-wrapper").fadeOut();
@@ -62,14 +156,14 @@ $(document).ready(function ($) {
     // && MD5($('#invite_code').val()) !== '2ac7f43695eb0479d5846bb38eec59cc') {
     // $('#alert-wrapper').html(alert_markup('danger', '<strong>Sorry!</strong> Your invite code is incorrect.'));
     // } else         {
-    $.post('https://script.google.com/macros/s/AKfycbzcsa6EvooHrsgM9hDTPOhhtQcebv1bnbYcsZZL1j--5Vny3VAFiXuadAl424aMJdKZTA/exec', data)
+    $.post('https://script.google.com/macros/s/AKfycbxStTY65LP5I5pcBO8GvbeZkRDLDpphnZcdcJODDugESrQVd7qqmR1bUZ8LhhCgOgpplw/exec', data)
       .done(function (data) {
         console.log(data);
         if (data.result === "error") {
           $('#alert-wrapper').html(alert_markup('danger', data.message));
         } else {
           $('#alert-wrapper').html('');
-          $('#rsvp-modal').modal('show');
+          openModal(document.getElementById('rsvp-modal'));
         }
       })
       .fail(function (data) {
