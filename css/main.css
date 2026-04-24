@@ -704,3 +704,10 @@ body.preloader-site {
 .events .rightcol {
   padding: 0 20px;
 }
+
+/* Rende il placeholder visibile completamente su smartphone */
+@media (max-width: 599px) {
+  .rsvp-form .input::placeholder {
+    font-size: 0.85rem;
+  }
+}
