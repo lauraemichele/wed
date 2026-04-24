@@ -159,7 +159,9 @@ html {
 
 .main-content .section-darker {
   /* background-color: #EDD2D1; */
-  background-color: rgba(144, 202, 119, 0.1);
+  /* background-color: rgba(144, 202, 119, 0.1); */
+  background-color: rgba(156, 64, 69, 0.15);
+
   padding: 80px 40px;
 }
 
@@ -230,7 +232,7 @@ html {
 }
 
 .main-content .section-light {
-  padding: 80px 40px;
+  padding: 80px 40px 160px 40px;
 }
 
 .main-content .section-light.regular-section {
@@ -419,8 +421,9 @@ html {
 }
 
 .divider-dark {
+  margin-bottom: -105px;
   display: inline-block;
-  max-height: 60px;
+  max-height: 160px;
   vertical-align: middle;
 }
 
@@ -675,10 +678,11 @@ body.preloader-site {
 }
 
 .section-light {
-  background-image: url(../image/divider-flowers-leaves.png);
-  background-position: bottom -30px center;
+  /* background-image: url(../image/divider-flowers-leaves.png); */
+  background-image: url(../image/anthurium-divider.png);
+  background-position: bottom center;
   background-repeat: no-repeat;
-  background-size: initial;
+  background-size: auto 170px;
 }
 
 .instagram {
