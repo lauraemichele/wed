@@ -1,5 +1,12 @@
 @import url("https://fonts.googleapis.com/css?family=Lato|Raleway|Rouge+Script");
 
+@font-face {
+  font-family: 'Beverly Drive Right';
+  src: url('../fonts/BeverlyDriveRight-Black.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
 .has-vertically-aligned-content {
   display: flex;
   flex-direction: column;
@@ -70,12 +77,11 @@ html {
 }
 
 
-
 .hero .title {
-  font-family: 'Rouge Script', sans-serif;
-  font-weight: 700;
+  font-family: 'Beverly Drive Right', sans-serif;
+  font-weight: 900;
   transform: rotate(-2deg);
-  font-size: 5rem;
+  font-size: 3.5rem;
   padding-bottom: 5px;
   color: whitesmoke;
 }
