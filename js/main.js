@@ -60,7 +60,7 @@ function generateCalendarLinks() {
   const eventLocation = "Parrocchia Sacra Famiglia, Strada Vaciglio Centro 280, Modena";
   const startDateTime = "2026-09-26T15:30:00";
   const endDateTime = "2026-09-26T18:00:00";
-  const eventNotes = "Sito web: https://lauraemichele.netlify.app\n\nPer maggiori dettagli visita il sito web del matrimonio.";
+  const eventNotes = "Sito web: https://michelecancilla.github.io/wed/\n\nPer maggiori dettagli visita il sito web del matrimonio.";
 
   // Google Calendar
   const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=20260926T153000Z/20260926T180000Z&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(eventNotes)}`;
@@ -78,7 +78,7 @@ METHOD:PUBLISH
 X-WR-CALNAME:${eventTitle}
 X-WR-TIMEZONE:Europe/Rome
 BEGIN:VEVENT
-UID:matrimonio-laura-michele@lauraemichele.netlify.app
+UID:matrimonio-laura-michele@michelecancilla.github.io
 DTSTAMP:20260926T153000Z
 DTSTART:20260926T153000Z
 DTEND:20260926T180000Z
