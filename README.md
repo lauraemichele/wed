@@ -14,7 +14,7 @@
 - Bulma CSS (https://bulma.io)
 
 # Info
-- Preview live at: [https://michelecancilla.github.io/wed/](https://michelecancilla.github.io/wed/)
+- Preview live at: [https://lauraemichele.github.io/wed/](https://lauraemichele.github.io/wed/)
 
 # Fonts
 - Rouge Script (Google Font)
