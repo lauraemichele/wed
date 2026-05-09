@@ -145,6 +145,21 @@ function showPhotoUploadSectionIfWeddingDay() {
 document.addEventListener("DOMContentLoaded", function () {
   generateCalendarLinks();
   showPhotoUploadSectionIfWeddingDay();
+  
+  // Prevent text selection on buttons
+  document.querySelectorAll('.button, .btn-cta, .btn-whatsapp').forEach(button => {
+    button.addEventListener('mousedown', function(e) {
+      e.preventDefault();
+    });
+    button.addEventListener('click', function() {
+      // Deselect any selected text
+      if (window.getSelection) {
+        window.getSelection().removeAllRanges();
+      } else if (document.selection) {
+        document.selection.empty();
+      }
+    });
+  });
 });
 
 // When the user scrolls down 20px from the top of the document, show the scroll up button
