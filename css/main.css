@@ -322,6 +322,16 @@ html {
   }
 }
 
+.main-content .section-light.contact.photo-upload {
+  padding-top: 120px;
+  padding-bottom: 100px;
+}
+
+.main-content .section-light.contact.photo-upload .divider,
+.main-content .section-light.contact.photo-upload .divider-dark {
+  margin-bottom: 0;
+}
+
 .main-content .section-color.pertanyaan {
   padding: 100px;
   background-color: #996E6D;

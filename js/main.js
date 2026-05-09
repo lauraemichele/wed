@@ -109,17 +109,29 @@ END:VCALENDAR`;
   });
 }
 
+// Show the photo upload section only on the wedding day or when debug override is active
+function getQueryParam(name) {
+  const params = new URLSearchParams(window.location.search);
+  return params.get(name);
+}
+
+function showPhotoUploadSectionIfWeddingDay() {
+  const today = new Date();
+  const isWeddingDay =
+    today.getFullYear() === 2026 &&
+    today.getMonth() === 8 && // months are zero-based: 8 = September
+    (today.getDate() === 26 || today.getDate() === 27);
+  const isDebugOverride = getQueryParam('showPhotoUpload') === '1' || localStorage.getItem('showPhotoUpload') === '1';
+  const section = document.getElementById('photo-upload-day');
+  if (section && (isWeddingDay || isDebugOverride)) {
+    section.style.display = 'block';
+  }
+}
+
 // Initialize calendar links on page load
 document.addEventListener("DOMContentLoaded", function () {
   generateCalendarLinks();
-
-  event.preventDefault();
-  $("html, body").animate(
-    {
-      scrollTop: $($.attr(this, "href")).offset().top
-    },
-    500
-  );
+  showPhotoUploadSectionIfWeddingDay();
 });
 
 // When the user scrolls down 20px from the top of the document, show the scroll up button
