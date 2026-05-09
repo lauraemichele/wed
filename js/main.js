@@ -59,14 +59,15 @@ function generateCalendarLinks() {
   const eventTitle = "Matrimonio Laura e Michele";
   const eventLocation = "Parrocchia Sacra Famiglia, Strada Vaciglio Centro 280, Modena";
   const startDateTime = "2026-09-26T15:30:00";
-  const endDateTime = "2026-09-26T18:00:00";
+  const endDateTime = "2026-09-26T17:00:00";
+  const eventTimeZone = "Europe/Rome";
   const eventNotes = "Sito web: https://lauraemichele.github.io/wed/\n\nPer maggiori dettagli visita il sito web del matrimonio.";
 
   // Google Calendar
-  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=20260926T153000Z/20260926T180000Z&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(eventNotes)}`;
+  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=20260926T153000/20260926T180000&ctz=${encodeURIComponent(eventTimeZone)}&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(eventNotes)}`;
 
   // Outlook
-  const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&startdt=${startDateTime}&enddt=${endDateTime}&location=${encodeURIComponent(eventLocation)}&body=${encodeURIComponent(eventNotes)}`;
+  const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&startdt=${encodeURIComponent(startDateTime)}&enddt=${encodeURIComponent(endDateTime)}&location=${encodeURIComponent(eventLocation)}&body=${encodeURIComponent(eventNotes)}`;
 
   // Apple Calendar - Generate ICS file for better iOS compatibility
   function generateICS() {
@@ -76,12 +77,12 @@ PRODID:-//Laura e Michele//Wedding//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 X-WR-CALNAME:${eventTitle}
-X-WR-TIMEZONE:Europe/Rome
+X-WR-TIMEZONE:${eventTimeZone}
 BEGIN:VEVENT
 UID:matrimonio-laura-michele@lauraemichele.github.io
 DTSTAMP:20260926T153000Z
-DTSTART:20260926T153000Z
-DTEND:20260926T180000Z
+DTSTART;TZID=${eventTimeZone}:20260926T153000
+DTEND;TZID=${eventTimeZone}:20260926T180000
 SUMMARY:${eventTitle}
 LOCATION:${eventLocation}
 DESCRIPTION:${eventNotes}
