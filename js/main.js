@@ -123,8 +123,21 @@ function showPhotoUploadSectionIfWeddingDay() {
     (today.getDate() === 26 || today.getDate() === 27);
   const isDebugOverride = getQueryParam('showPhotoUpload') === '1' || localStorage.getItem('showPhotoUpload') === '1';
   const section = document.getElementById('photo-upload-day');
-  if (section && (isWeddingDay || isDebugOverride)) {
-    section.style.display = 'block';
+  const navItems = document.querySelectorAll('.photo-upload-menu');
+  const shouldShow = isWeddingDay || isDebugOverride;
+
+  if (section) {
+    section.style.display = shouldShow ? 'block' : 'none';
+  }
+
+  if (navItems.length) {
+    navItems.forEach((item) => {
+      if (shouldShow) {
+        item.classList.remove('is-hidden');
+      } else {
+        item.classList.add('is-hidden');
+      }
+    });
   }
 }
 
