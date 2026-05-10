@@ -56,15 +56,15 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Calendar Event URLs
 function generateCalendarLinks() {
-  const eventTitle = "Matrimonio Laura e Michele";
+  const eventTitle = "Matrimonio Laura e Michele ♥️";
   const eventLocation = "Parrocchia Sacra Famiglia, Strada Vaciglio Centro 280, Modena";
   const startDateTime = "2026-09-26T15:30:00";
-  const endDateTime = "2026-09-26T17:00:00";
+  const endDateTime = "2026-09-27T02:00:00";
   const eventTimeZone = "Europe/Rome";
-  const eventNotes = "Sito web: https://lauraemichele.github.io/wed/\n\nPer maggiori dettagli visita il sito web del matrimonio.";
+  const eventNotes = "Sito web: https://lauraemichele.github.io/wed\n\nPer maggiori dettagli visita il sito web del matrimonio.";
 
-  // Google Calendar
-  const googleUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(eventTitle)}&dates=20260926T153000/20260926T180000&ctz=${encodeURIComponent(eventTimeZone)}&location=${encodeURIComponent(eventLocation)}&details=${encodeURIComponent(eventNotes)}`;
+  // Google Calendar - Use existing event link
+  const googleUrl = "https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=YzVqM2ljMWs3NWg2NmI5bDZrc2owYjlrNjloMzJiYjI2Z3NqNmJiNDZjc200ZGI1NjhvM2FjOW83NCBmYW1pbHkxNzk4NDY4MDMwMjM5ODU4OTAwOUBn&tmsrc=family17984680302398589009%40group.calendar.google.com";
 
   // Outlook
   const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&startdt=${encodeURIComponent(startDateTime)}&enddt=${encodeURIComponent(endDateTime)}&location=${encodeURIComponent(eventLocation)}&body=${encodeURIComponent(eventNotes)}`;
@@ -82,7 +82,7 @@ BEGIN:VEVENT
 UID:matrimonio-laura-michele@lauraemichele.github.io
 DTSTAMP:20260926T153000Z
 DTSTART;TZID=${eventTimeZone}:20260926T153000
-DTEND;TZID=${eventTimeZone}:20260926T180000
+DTEND;TZID=${eventTimeZone}:20260927T020000
 SUMMARY:${eventTitle}
 LOCATION:${eventLocation}
 DESCRIPTION:${eventNotes}
@@ -191,7 +191,7 @@ $(document).ready(function ($) {
     e.preventDefault();
     var data = $(this).serialize();
 
-    $('#alert-wrapper').html(alert_markup('info', '<strong>Solo un secondo!</strong> Stiamo salvando i tuoi dati.'));
+    $('#alert-wrapper').html(alert_markup('danger is-light', '<strong>Solo un secondo!</strong> Stiamo salvando i tuoi dati.'));
 
     // if (MD5($('#invite_code').val()) !== 'b0e53b10c1f55ede516b240036b88f40'
     // && MD5($('#invite_code').val()) !== '2ac7f43695eb0479d5846bb38eec59cc') {
