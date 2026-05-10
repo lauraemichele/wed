@@ -145,13 +145,13 @@ function showPhotoUploadSectionIfWeddingDay() {
 document.addEventListener("DOMContentLoaded", function () {
   generateCalendarLinks();
   showPhotoUploadSectionIfWeddingDay();
-  
+
   // Prevent text selection on buttons
   document.querySelectorAll('.button, .btn-cta, .btn-whatsapp').forEach(button => {
-    button.addEventListener('mousedown', function(e) {
+    button.addEventListener('mousedown', function (e) {
       e.preventDefault();
     });
-    button.addEventListener('click', function() {
+    button.addEventListener('click', function () {
       // Deselect any selected text
       if (window.getSelection) {
         window.getSelection().removeAllRanges();
@@ -183,7 +183,7 @@ function alert_markup(alert_type, msg) {
 
 // Preloader
 $(document).ready(function ($) {
-  $(".preloader-wrapper").fadeOut();
+  $(".preloader-wrapper").fadeOut(800);
   $("body").removeClass("preloader-site");
 
   /********************** RSVP **********************/
