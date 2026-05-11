@@ -25,13 +25,13 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         uses: actions/configure-pages@v4
+      - name: Inject IBAN
+        run: |
+          sed -i "s|%IBAN%|${{ secrets.IBAN }}|g" index.html
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: '.'
-      - name: Inject IBAN
-        run: |
-          sed -i "s|%IBAN%|${{ secrets.IBAN }}|g" index.html
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
