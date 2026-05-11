@@ -1,4 +1,6 @@
-@import url("https://fonts.googleapis.com/css?family=Lato|Raleway|Rouge+Script");
+.rsvp {
+    font-family: 'KGOneMoreLightBIG', sans-serif;
+}
 
 /* ==========================================================================
 RSVP form
@@ -80,4 +82,8 @@ RSVP form
             }
         }
     }
+}
+
+.btn-cta {
+  font-family: 'KGOneMoreLightBIG', sans-serif !important;
 }
