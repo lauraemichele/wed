@@ -63,38 +63,24 @@ function generateCalendarLinks() {
   const eventTimeZone = "Europe/Rome";
   const eventNotes = "Sito web: https://lauraemichele.github.io/wed\n\nPer maggiori dettagli visita il sito web del matrimonio.";
 
-  // Google Calendar - Use existing event link
-  const googleUrl = "https://calendar.google.com/calendar/event?action=TEMPLATE&tmeid=YzVqM2ljMWs3NWg2NmI5bDZrc2owYjlrNjloMzJiYjI2Z3NqNmJiNDZjc200ZGI1NjhvM2FjOW83NCBmYW1pbHkxNzk4NDY4MDMwMjM5ODU4OTAwOUBn&tmsrc=family17984680302398589009%40group.calendar.google.com";
+  // Google Calendar - render URL with event params; deep-links to the
+  // Google Calendar app on Android via App Links when installed.
+  const googleParams = new URLSearchParams({
+    action: "TEMPLATE",
+    text: eventTitle,
+    dates: "20260926T153000/20260927T020000",
+    ctz: eventTimeZone,
+    details: eventNotes,
+    location: eventLocation,
+  });
+  const googleUrl = `https://www.google.com/calendar/render?${googleParams.toString()}`;
 
   // Outlook
   const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&startdt=${encodeURIComponent(startDateTime)}&enddt=${encodeURIComponent(endDateTime)}&location=${encodeURIComponent(eventLocation)}&body=${encodeURIComponent(eventNotes)}`;
 
-  // Apple Calendar - Generate ICS file for better iOS compatibility
-  function generateICS() {
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Laura e Michele//Wedding//EN
-CALSCALE:GREGORIAN
-METHOD:PUBLISH
-X-WR-CALNAME:${eventTitle}
-X-WR-TIMEZONE:${eventTimeZone}
-BEGIN:VEVENT
-UID:matrimonio-laura-michele@lauraemichele.github.io
-DTSTAMP:20260926T153000Z
-DTSTART;TZID=${eventTimeZone}:20260926T153000
-DTEND;TZID=${eventTimeZone}:20260927T020000
-SUMMARY:${eventTitle}
-LOCATION:${eventLocation}
-DESCRIPTION:${eventNotes}
-STATUS:CONFIRMED
-SEQUENCE:0
-END:VEVENT
-END:VCALENDAR`;
-
-    const blob = new Blob([icsContent], { type: 'text/calendar' });
-    const url = URL.createObjectURL(blob);
-    return url;
-  }
+  // Apple Calendar - link directly to the static .ics file. Real .ics URLs
+  // over HTTPS are the most reliable trigger for iOS "Add to Calendar".
+  const appleUrl = 'matrimonio-laura-michele.ics';
 
   // Assign URLs to links
   document.querySelectorAll('.buttons a.btn-cta').forEach((link) => {
@@ -103,8 +89,7 @@ END:VCALENDAR`;
     } else if (link.querySelector('.fa-microsoft')) {
       link.href = outlookUrl;
     } else if (link.querySelector('.fa-apple')) {
-      link.href = generateICS();
-      link.download = 'matrimonio-laura-michele.ics';
+      link.href = appleUrl;
     }
   });
 }
