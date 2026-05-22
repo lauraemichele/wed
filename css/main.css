@@ -101,6 +101,17 @@ a.navbar-item {
     background-size: cover;
     background-position: center center;
   }
+
+  #time .columns {
+    margin-left: -0.375rem;
+    margin-right: -0.375rem;
+  }
+  #time .columns > .column {
+    padding: 0.375rem;
+  }
+  #time .box {
+    padding: 0.75rem;
+  }
 }
 
 /*.hero {*/
