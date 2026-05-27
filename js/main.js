@@ -56,42 +56,36 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Calendar Event URLs
 function generateCalendarLinks() {
+  const button = document.getElementById('add-to-calendar');
+  if (!button) return;
+
+  const ua = navigator.userAgent;
+  const isAndroidChrome =
+    /Android/.test(ua) &&
+    /Chrome/.test(ua) &&
+    !/EdgA|OPR|SamsungBrowser|Firefox/i.test(ua);
+
+  if (!isAndroidChrome) return; // .ics fallback already set in HTML href
+
   const eventTitle = "Matrimonio Laura e Michele ♥️";
   const eventLocation = "Parrocchia Sacra Famiglia, Strada Vaciglio Centro 280, Modena";
-  const startDateTime = "2026-09-26T15:30:00";
-  const endDateTime = "2026-09-27T02:00:00";
-  const eventTimeZone = "Europe/Rome";
   const eventNotes = "Sito web: https://lauraemichele.github.io/wed\n\nPer maggiori dettagli visita il sito web del matrimonio.";
+  // Europe/Rome in September is CEST (UTC+2): 15:30 local = 13:30 UTC.
+  const startMs = Date.UTC(2026, 8, 26, 13, 30, 0);
+  const endMs = Date.UTC(2026, 8, 27, 0, 0, 0);
+  const fallbackUrl = new URL('matrimonio-laura-michele.ics', window.location.href).href;
 
-  // Google Calendar - render URL with event params; deep-links to the
-  // Google Calendar app on Android via App Links when installed.
-  const googleParams = new URLSearchParams({
-    action: "TEMPLATE",
-    text: eventTitle,
-    dates: "20260926T153000/20260927T020000",
-    ctz: eventTimeZone,
-    details: eventNotes,
-    location: eventLocation,
-  });
-  const googleUrl = `https://www.google.com/calendar/render?${googleParams.toString()}`;
-
-  // Outlook
-  const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${encodeURIComponent(eventTitle)}&startdt=${encodeURIComponent(startDateTime)}&enddt=${encodeURIComponent(endDateTime)}&location=${encodeURIComponent(eventLocation)}&body=${encodeURIComponent(eventNotes)}`;
-
-  // Apple Calendar - link directly to the static .ics file. Real .ics URLs
-  // over HTTPS are the most reliable trigger for iOS "Add to Calendar".
-  const appleUrl = 'matrimonio-laura-michele.ics';
-
-  // Assign URLs to links
-  document.querySelectorAll('.buttons a.btn-cta').forEach((link) => {
-    if (link.querySelector('.fa-google')) {
-      link.href = googleUrl;
-    } else if (link.querySelector('.fa-microsoft')) {
-      link.href = outlookUrl;
-    } else if (link.querySelector('.fa-apple')) {
-      link.href = appleUrl;
-    }
-  });
+  button.href =
+    'intent:#Intent' +
+    ';action=android.intent.action.INSERT' +
+    ';type=vnd.android.cursor.item/event' +
+    ';S.title=' + encodeURIComponent(eventTitle) +
+    ';S.eventLocation=' + encodeURIComponent(eventLocation) +
+    ';S.description=' + encodeURIComponent(eventNotes) +
+    ';l.beginTime=' + startMs +
+    ';l.endTime=' + endMs +
+    ';S.browser_fallback_url=' + encodeURIComponent(fallbackUrl) +
+    ';end';
 }
 
 // Show the photo upload section only on the wedding day or when debug override is active
