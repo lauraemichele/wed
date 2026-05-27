@@ -74,17 +74,19 @@ function generateCalendarLinks() {
   const startMs = Date.UTC(2026, 8, 26, 13, 30, 0);
   const endMs = Date.UTC(2026, 8, 27, 0, 0, 0);
 
-  // Targeting package=com.google.android.calendar makes Chrome resolve the
-  // intent only against the Google Calendar app — if it is installed the
-  // app opens; if not, the browser_fallback_url fires straight to the .ics
-  // (no web Google Calendar detour).
+  // Use type-based intent (no content URI) targeting the Google Calendar
+  // package. This matches GCal's manifest intent-filter exactly
+  // (action=INSERT + mimeType=vnd.android.cursor.item/event + category=DEFAULT).
+  // If GCal is installed the app opens; if not, browser_fallback_url fires
+  // straight to the .ics — no web Google Calendar detour.
   const fallbackUrl = new URL('matrimonio-laura-michele.ics', window.location.href).href;
 
   button.href =
-    'intent://com.android.calendar/events#Intent' +
-    ';scheme=content' +
+    'intent:#Intent' +
     ';package=com.google.android.calendar' +
     ';action=android.intent.action.INSERT' +
+    ';category=android.intent.category.DEFAULT' +
+    ';type=vnd.android.cursor.item/event' +
     ';S.title=' + encodeURIComponent(eventTitle) +
     ';S.eventLocation=' + encodeURIComponent(eventLocation) +
     ';S.description=' + encodeURIComponent(eventNotes) +
