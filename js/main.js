@@ -74,23 +74,16 @@ function generateCalendarLinks() {
   const startMs = Date.UTC(2026, 8, 26, 13, 30, 0);
   const endMs = Date.UTC(2026, 8, 27, 0, 0, 0);
 
-  // Fallback when the intent doesn't resolve: Google Calendar's render
-  // URL. The Google Calendar Android app intercepts this via App Links.
-  const googleParams = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: eventTitle,
-    dates: '20260926T153000/20260927T020000',
-    ctz: 'Europe/Rome',
-    details: eventNotes,
-    location: eventLocation,
-  });
-  const fallbackUrl = 'https://www.google.com/calendar/render?' + googleParams.toString();
+  // Targeting package=com.google.android.calendar makes Chrome resolve the
+  // intent only against the Google Calendar app — if it is installed the
+  // app opens; if not, the browser_fallback_url fires straight to the .ics
+  // (no web Google Calendar detour).
+  const fallbackUrl = new URL('matrimonio-laura-michele.ics', window.location.href).href;
 
-  // Use the canonical content URI form (intent://com.android.calendar/events
-  // with scheme=content) — more reliable than the bare type=... form.
   button.href =
     'intent://com.android.calendar/events#Intent' +
     ';scheme=content' +
+    ';package=com.google.android.calendar' +
     ';action=android.intent.action.INSERT' +
     ';S.title=' + encodeURIComponent(eventTitle) +
     ';S.eventLocation=' + encodeURIComponent(eventLocation) +
