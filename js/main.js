@@ -65,37 +65,24 @@ function generateCalendarLinks() {
     /Chrome/.test(ua) &&
     !/EdgA|OPR|SamsungBrowser|Firefox/i.test(ua);
 
-  if (!isAndroidChrome) return; // .ics fallback already set in HTML href
+  if (!isAndroidChrome) return; // .ics default set in HTML href
 
+  // Google Calendar render URL — on Android Chrome the Google Calendar app
+  // intercepts this via App Links when installed; otherwise it opens the
+  // web compose form. (intent:// URIs were unreliable: Chrome kept falling
+  // through to the browser_fallback_url even with the right intent-filter.)
   const eventTitle = "Matrimonio Laura e Michele ♥️";
   const eventLocation = "Parrocchia Sacra Famiglia, Strada Vaciglio Centro 280, Modena";
   const eventNotes = "Sito web: https://lauraemichele.github.io/wed\n\nPer maggiori dettagli visita il sito web del matrimonio.";
-  // Europe/Rome in September is CEST (UTC+2): 15:30 local = 13:30 UTC.
-  const startMs = Date.UTC(2026, 8, 26, 13, 30, 0);
-  const endMs = Date.UTC(2026, 8, 27, 0, 0, 0);
-
-  // Use type-based intent (no content URI) targeting the Google Calendar
-  // package. This matches GCal's manifest intent-filter exactly
-  // (action=INSERT + mimeType=vnd.android.cursor.item/event + category=DEFAULT).
-  // If GCal is installed the app opens; if not, browser_fallback_url fires
-  // straight to the .ics — no web Google Calendar detour.
-  const fallbackUrl = new URL('matrimonio-laura-michele.ics', window.location.href).href;
-
-  button.href =
-    'intent:#Intent' +
-    ';package=com.google.android.calendar' +
-    ';action=android.intent.action.INSERT' +
-    ';category=android.intent.category.DEFAULT' +
-    ';type=vnd.android.cursor.item/event' +
-    ';S.title=' + encodeURIComponent(eventTitle) +
-    ';S.eventLocation=' + encodeURIComponent(eventLocation) +
-    ';S.description=' + encodeURIComponent(eventNotes) +
-    ';l.beginTime=' + startMs +
-    ';l.endTime=' + endMs +
-    ';S.browser_fallback_url=' + encodeURIComponent(fallbackUrl) +
-    ';end';
-  // target=_blank breaks intent dispatch in Chrome on Android.
-  button.removeAttribute('target');
+  const googleParams = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: eventTitle,
+    dates: '20260926T153000/20260927T020000',
+    ctz: 'Europe/Rome',
+    details: eventNotes,
+    location: eventLocation,
+  });
+  button.href = 'https://www.google.com/calendar/render?' + googleParams.toString();
 }
 
 // Show the photo upload section only on the wedding day or when debug override is active
