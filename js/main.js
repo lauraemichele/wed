@@ -73,12 +73,25 @@ function generateCalendarLinks() {
   // Europe/Rome in September is CEST (UTC+2): 15:30 local = 13:30 UTC.
   const startMs = Date.UTC(2026, 8, 26, 13, 30, 0);
   const endMs = Date.UTC(2026, 8, 27, 0, 0, 0);
-  const fallbackUrl = new URL('matrimonio-laura-michele.ics', window.location.href).href;
 
+  // Fallback when the intent doesn't resolve: Google Calendar's render
+  // URL. The Google Calendar Android app intercepts this via App Links.
+  const googleParams = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: eventTitle,
+    dates: '20260926T153000/20260927T020000',
+    ctz: 'Europe/Rome',
+    details: eventNotes,
+    location: eventLocation,
+  });
+  const fallbackUrl = 'https://www.google.com/calendar/render?' + googleParams.toString();
+
+  // Use the canonical content URI form (intent://com.android.calendar/events
+  // with scheme=content) — more reliable than the bare type=... form.
   button.href =
-    'intent:#Intent' +
+    'intent://com.android.calendar/events#Intent' +
+    ';scheme=content' +
     ';action=android.intent.action.INSERT' +
-    ';type=vnd.android.cursor.item/event' +
     ';S.title=' + encodeURIComponent(eventTitle) +
     ';S.eventLocation=' + encodeURIComponent(eventLocation) +
     ';S.description=' + encodeURIComponent(eventNotes) +
@@ -86,6 +99,8 @@ function generateCalendarLinks() {
     ';l.endTime=' + endMs +
     ';S.browser_fallback_url=' + encodeURIComponent(fallbackUrl) +
     ';end';
+  // target=_blank breaks intent dispatch in Chrome on Android.
+  button.removeAttribute('target');
 }
 
 // Show the photo upload section only on the wedding day or when debug override is active
