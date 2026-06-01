@@ -73,6 +73,16 @@ a.navbar-item {
   color: #996E6D;
 }
 
+/* Override Bulma's blue focus/active color with a darker dusty pink */
+a.navbar-item:hover,
+a.navbar-item:focus,
+a.navbar-item:focus-within,
+a.navbar-item:active,
+a.navbar-item.is-active {
+  color: #7A5857;
+  background-color: transparent;
+}
+
 /*.hero {*/
 /*  !* Avoid fixed background on mobile for performance and proper scaling *!*/
 /*  background-attachment: scroll;*/
@@ -175,8 +185,10 @@ a.navbar-item {
   color: #996E6D;
 }
 
-.hero .hero-foot .hero-foot--wrapper .hero-menu-desktop ul li a:hover {
-  color: #996E6D;
+.hero .hero-foot .hero-foot--wrapper .hero-menu-desktop ul li a:hover,
+.hero .hero-foot .hero-foot--wrapper .hero-menu-desktop ul li a:focus,
+.hero .hero-foot .hero-foot--wrapper .hero-menu-desktop ul li a:active {
+  color: #7A5857;
   transition: all .2s ease-in-out;
   border-bottom: 2px solid #c28285;
 }
@@ -365,6 +377,11 @@ body {
 #rsvp .subtitle,
 #rsvp-form .input {
   font-family: 'Rinnero', 'KGOneMoreLightBIG', sans-serif;
+}
+
+#iban,
+#intestatari {
+  font-size: 1.35rem;
 }
 
 .hero .tempattime {
