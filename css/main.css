@@ -215,6 +215,13 @@ a.navbar-item.is-active {
   padding: 80px 40px;
 }
 
+/* The Location title sits outside the cards' .columns row, whose default
+   -0.75rem top margin pulls the cards up against it. Neutralize it so the
+   title-to-content gap matches the other sections. */
+#location .columns.is-multiline {
+  margin-top: 0;
+}
+
 .main-content .section-dark.resume {
   height: 400px;
   padding-top: 60px;
@@ -379,9 +386,12 @@ body {
   font-family: 'Rinnero', 'KGOneMoreLightBIG', sans-serif;
 }
 
-#iban,
-#intestatari {
+#iban {
   font-size: 1.35rem;
+}
+
+#intestatari {
+  font-size: 1.25rem;
 }
 
 .hero .tempattime {
