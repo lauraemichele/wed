@@ -183,7 +183,8 @@ $(document).ready(function ($) {
   /********************** RSVP **********************/
   $('#rsvp-form').on('submit', function (e) {
     e.preventDefault();
-    var data = $(this).serialize();
+    var $form = $(this);
+    var data = $form.serialize();
 
     $('#alert-wrapper').html(alert_markup('danger is-light', '<strong>Solo un secondo!</strong> Stiamo salvando i tuoi dati.'));
 
@@ -198,6 +199,7 @@ $(document).ready(function ($) {
           $('#alert-wrapper').html(alert_markup('danger', data.message));
         } else {
           $('#alert-wrapper').html('');
+          $form[0].reset();
           openModal(document.getElementById('rsvp-modal'));
         }
       })
