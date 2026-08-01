@@ -45,11 +45,11 @@ To run the site locally for development:
    # Then visit http://localhost:8000
    ```
 
-### Debugging Photo Upload Feature
+### Debugging Hidden Menu Features
 
-The photo upload section is normally visible only on the wedding day (September 26-27, 2026). To debug or preview this feature:
+The hidden sections are normally visible only after the wedding-day cutoff (from 26 September 2026 at 18:00 CEST). To debug or preview these features:
 
-- Visit: [index.html?showPhotoUpload=1](index.html?showPhotoUpload=1)
-- Or set in browser console: `localStorage.setItem('showPhotoUpload', '1')` and refresh
+- Visit: [index.html?showHiddenMenu=1](index.html?showHiddenMenu=1)
+- Or set in browser console: `localStorage.setItem('showHiddenMenu', '1')` and refresh
 
-This will display the photo upload section, allowing you to test the OneDrive integration for uploading wedding photos.
+This will display the hidden sections and menu items, allowing you to preview the photo upload and recipes content.

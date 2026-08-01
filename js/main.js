@@ -109,36 +109,44 @@ function getQueryParam(name) {
   return params.get(name);
 }
 
-function showPhotoUploadSectionIfWeddingDay() {
+function isWeddingWindowDay() {
   const today = new Date();
-  const isWeddingDay =
-    today.getFullYear() === 2026 &&
-    today.getMonth() === 8 && // months are zero-based: 8 = September
-    (today.getDate() === 26 || today.getDate() === 27);
-  const isDebugOverride = getQueryParam('showPhotoUpload') === '1' || localStorage.getItem('showPhotoUpload') === '1';
-  const section = document.getElementById('photo-upload-day');
-  const navItems = document.querySelectorAll('.photo-upload-menu');
-  const shouldShow = isWeddingDay || isDebugOverride;
+  const weddingCutoff = new Date(2026, 8, 26, 18, 0, 0);
+  return today.getTime() >= weddingCutoff.getTime();
+}
 
-  if (section) {
-    section.style.display = shouldShow ? 'block' : 'none';
-  }
+function showHiddenSections() {
+  const isDebugOverride = getQueryParam('showHiddenMenu') === '1' || localStorage.getItem('showHiddenMenu') === '1';
+  const shouldShow = isWeddingWindowDay() || isDebugOverride;
+  const sectionConfigs = [
+    { sectionId: 'photo-upload-day', navClass: '.photo-upload-menu' },
+    { sectionId: 'recipes', navClass: '.recipes-menu' },
+  ];
 
-  if (navItems.length) {
-    navItems.forEach((item) => {
-      if (shouldShow) {
-        item.classList.remove('is-hidden');
-      } else {
-        item.classList.add('is-hidden');
-      }
-    });
-  }
+  sectionConfigs.forEach(({ sectionId, navClass }) => {
+    const section = document.getElementById(sectionId);
+    const navItems = document.querySelectorAll(navClass);
+
+    if (section) {
+      section.style.display = shouldShow ? 'block' : 'none';
+    }
+
+    if (navItems.length) {
+      navItems.forEach((item) => {
+        if (shouldShow) {
+          item.classList.remove('is-hidden');
+        } else {
+          item.classList.add('is-hidden');
+        }
+      });
+    }
+  });
 }
 
 // Initialize calendar links on page load
 document.addEventListener("DOMContentLoaded", function () {
   generateCalendarLinks();
-  showPhotoUploadSectionIfWeddingDay();
+  showHiddenSections();
 
   // Prevent text selection on buttons
   document.querySelectorAll('.button, .btn-cta, .btn-whatsapp').forEach(button => {
