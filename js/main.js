@@ -170,10 +170,12 @@ window.onscroll = function () {
 };
 
 function scrollFunction() {
+  const toTop = document.getElementById("toTop");
+  if (!toTop) return;
   if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-    document.getElementById("toTop").style.display = "block";
+    toTop.style.display = "block";
   } else {
-    document.getElementById("toTop").style.display = "none";
+    toTop.style.display = "none";
   }
 }
 
@@ -217,8 +219,4 @@ $(document).ready(function ($) {
       });
     // }
   });
-});
-$(window).load(function () {
-  var Body = $("body");
-  Body.addClass("preloader-site");
 });

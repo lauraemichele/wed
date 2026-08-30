@@ -615,6 +615,15 @@ body.preloader-site {
   margin-top: 1rem;
 }
 
+.btn-simple {
+  color: #800020;
+  background-color: white;
+  border: 2px solid #800020;
+  border-radius: 10px;
+  user-select: none;
+  margin-top: 1rem;
+}
+
 .cashbac-logo-inline {
   width: 160px;
   vertical-align: middle;
@@ -824,6 +833,14 @@ body.preloader-site {
 }
 .photo-uploader .buttons .button {
   margin-top: 0;
+}
+.photo-uploader .btn-cta[disabled],
+.photo-uploader .btn-cta:disabled {
+  background-color: #b57a7a;
+  border-color: #b57a7a;
+  color: white;
+  opacity: 1;
+  cursor: not-allowed;
 }
 .photo-fallback {
   margin-top: 12px;
