@@ -7,6 +7,8 @@
   const MAX_CONCURRENT = 4;
   const MAX_FILE_SIZE_MB = 25;
   const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
+  const UPLOAD_RETRIES = 3;
+  const UPLOAD_RETRY_DELAYS_MS = [800, 2000, 5000];
 
   document.addEventListener('DOMContentLoaded', function () {
     const uploader = document.getElementById('photo-uploader');
@@ -125,7 +127,8 @@
       const stateEl = li.querySelector('.photo-file-state');
       if (!stateEl) return;
       if (state === 'uploading') {
-        stateEl.innerHTML = '<span class="has-text-info">caricamento…</span>';
+        stateEl.innerHTML = '<span class="has-text-info">caricamento…' +
+          (extra ? ' (' + escapeHtml(extra) + ')' : '') + '</span>';
       } else if (state === 'ok') {
         stateEl.innerHTML = '<span class="has-text-success">ok</span>';
       } else if (state === 'error') {
@@ -141,6 +144,25 @@
       markFile(i, 'uploading');
       const base64 = await fileToBase64(file);
 
+      let lastErr;
+      for (let attempt = 0; attempt <= UPLOAD_RETRIES; attempt++) {
+        if (attempt > 0) {
+          const delay = UPLOAD_RETRY_DELAYS_MS[attempt - 1] || 5000;
+          markFile(i, 'uploading', 'tentativo ' + (attempt + 1));
+          await sleep(delay);
+        }
+        try {
+          await postToAppsScript(file, base64);
+          markFile(i, 'ok');
+          return;
+        } catch (err) {
+          lastErr = err;
+        }
+      }
+      throw lastErr || new Error('errore sconosciuto');
+    }
+
+    async function postToAppsScript(file, base64) {
       // FormData (multipart/form-data) evita il preflight CORS
       // e Apps Script legge i campi da e.parameter.
       const body = new FormData();
@@ -148,7 +170,11 @@
       body.append('mimeType', file.type || 'application/octet-stream');
       body.append('data', base64);
 
-      const res = await fetch(PHOTO_UPLOAD_URL, { method: 'POST', body: body });
+      const res = await fetch(PHOTO_UPLOAD_URL, {
+        method: 'POST',
+        body: body,
+        redirect: 'follow',
+      });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const text = await res.text();
       let json;
@@ -158,7 +184,10 @@
         throw new Error('risposta non valida');
       }
       if (json.result !== 'ok') throw new Error(json.message || 'errore server');
-      markFile(i, 'ok');
+    }
+
+    function sleep(ms) {
+      return new Promise(function (resolve) { setTimeout(resolve, ms); });
     }
 
     function fileToBase64(file) {
