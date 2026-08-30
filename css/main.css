@@ -822,6 +822,9 @@ body.preloader-site {
   margin: 8px 0 12px;
   min-height: 1.2em;
 }
+.photo-uploader .buttons .button {
+  margin-top: 0;
+}
 .photo-fallback {
   margin-top: 12px;
   color: #888;
