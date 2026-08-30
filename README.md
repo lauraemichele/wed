@@ -49,7 +49,7 @@ To run the site locally for development:
 
 The hidden sections are normally visible only after the wedding-day cutoff (from 26 September 2026 at 18:00 CEST). To debug or preview these features:
 
-- Visit: [index.html?showHiddenMenu=1](index.html?showHiddenMenu=1)
+    - Visit: [index.html?showHiddenMenu=1](index.html?showHiddenMenu=1)
 - Or set in browser console: `localStorage.setItem('showHiddenMenu', '1')` and refresh
 
 This will display the hidden sections and menu items, allowing you to preview the photo upload and recipes content.

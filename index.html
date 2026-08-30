@@ -537,13 +537,37 @@
         <div class="columns is-centered">
           <div class="column is-10 has-text-centered" data-aos="fade-up" data-aos-easing="linear">
             <p class="h2 subtitle">
-              Clicca qui sotto per caricare le foto del matrimonio direttamente nella nostra cartella condivisa.
+              Carica qui le foto e i video del matrimonio: finiranno nella nostra cartella Google Drive.
             </p>
-            <div class="space20px"></div>
-            <a href="https://drive.google.com/drive/folders/1zt7Nc2fs9h9iO8SdnaDMUZJeYahl3IFM" target="_blank" rel="noreferrer noopener" class="button btn-cta">
-              <i class="fa fa-cloud"></i>
-              &nbsp;&nbsp;Carica foto
-            </a>
+
+            <div id="photo-uploader" class="box photo-uploader">
+              <div class="field">
+                <div class="file is-centered has-name is-boxed">
+                  <label class="file-label">
+                    <input class="file-input" type="file" id="photo-input" name="photos" accept="image/*,video/*" multiple>
+                    <span class="file-cta">
+                      <span class="file-icon"><i class="fas fa-upload"></i></span>
+                      <span class="file-label">Scegli foto o video…</span>
+                    </span>
+                  </label>
+                </div>
+              </div>
+              <p class="help photo-help">Massimo 100 file per volta, fino a 25&nbsp;MB ciascuno.</p>
+              <ul id="photo-file-list" class="photo-file-list"></ul>
+              <p id="photo-status" class="photo-status"></p>
+              <div class="buttons is-centered">
+                <button id="photo-submit" class="button btn-cta" type="button" disabled>
+                  <i class="fa fa-cloud"></i>&nbsp;&nbsp;Carica
+                </button>
+                <button id="photo-clear" class="button" type="button">Svuota</button>
+              </div>
+            </div>
+
+            <p class="photo-fallback is-size-7">
+              In alternativa,
+              <a href="https://drive.google.com/drive/folders/1zt7Nc2fs9h9iO8SdnaDMUZJeYahl3IFM" target="_blank" rel="noreferrer noopener">apri la cartella Drive</a>
+              e carica da lì.
+            </p>
           </div>
         </div>
         <div class="space40px"></div>
@@ -614,6 +638,7 @@
 
   <!-- Scripts -->
   <script src="js/main.js"></script>
+  <script src="js/photo-upload.js"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.css" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.1/aos.js"></script>
 
