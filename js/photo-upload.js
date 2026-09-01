@@ -1,14 +1,14 @@
 (function () {
-  // Paste here the Google Apps Script Web App URL after deploy.
-  // If empty, the uploader UI is hidden and only the Drive-folder fallback is shown.
+  // Google Apps Script Web App URL. Deve esporre l'azione 'createSession'
+  // che restituisce { result: 'ok', sessionUri: '...' } — vedi lo script in fondo.
   const PHOTO_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbyQFzorPHx7oLkm19Ptcfg7jtn6jRCRoYN5_jogNiAh-ZA2bc4UAfRiwQE7TcvjrG9r/exec';
 
   const MAX_FILES = 100;
-  const MAX_CONCURRENT = 4;
-  const MAX_FILE_SIZE_MB = 25;
-  const MAX_FILE_SIZE = MAX_FILE_SIZE_MB * 1024 * 1024;
-  const UPLOAD_RETRIES = 3;
-  const UPLOAD_RETRY_DELAYS_MS = [800, 2000, 5000];
+  const MAX_CONCURRENT = 3;
+  const MAX_PHOTO_BYTES = 50 * 1024 * 1024;              // 50 MB
+  const MAX_VIDEO_BYTES = 3 * 1024 * 1024 * 1024;        // 3 GB
+  const SESSION_RETRIES = 2;                              // tentativi extra per file
+  const RETRY_BASE_DELAY_MS = 1500;
 
   document.addEventListener('DOMContentLoaded', function () {
     const uploader = document.getElementById('photo-uploader');
@@ -100,25 +100,35 @@
       uploading = false;
       fileInput.disabled = false;
       clearBtn.disabled = false;
-      // Keep submit disabled: force a new selection to avoid double uploads.
       submitBtn.disabled = true;
     });
 
     function renderList() {
       fileListEl.innerHTML = '';
       selected.forEach(function (f, i) {
-        const oversize = f.size > MAX_FILE_SIZE;
+        const over = fileOverLimit(f);
         const li = document.createElement('li');
         li.id = 'photo-file-' + i;
         li.className = 'photo-file-item';
         li.innerHTML =
           '<span class="photo-file-name">' + escapeHtml(f.name) + '</span>' +
-          '<span class="photo-file-size">' + (f.size / (1024 * 1024)).toFixed(1) + '&nbsp;MB</span>' +
+          '<span class="photo-file-size">' + formatSize(f.size) + '</span>' +
           '<span class="photo-file-state">' +
-            (oversize ? '<span class="has-text-danger">troppo grande</span>' : 'in coda') +
+            (over ? '<span class="has-text-danger">' + escapeHtml(over) + '</span>' : 'in coda') +
           '</span>';
         fileListEl.appendChild(li);
       });
+    }
+
+    function fileOverLimit(file) {
+      const isVideo = /^video\//.test(file.type || '');
+      const limit = isVideo ? MAX_VIDEO_BYTES : MAX_PHOTO_BYTES;
+      if (file.size > limit) {
+        return isVideo
+          ? 'video oltre ' + Math.round(MAX_VIDEO_BYTES / (1024 * 1024 * 1024)) + ' GB'
+          : 'file oltre ' + Math.round(MAX_PHOTO_BYTES / (1024 * 1024)) + ' MB';
+      }
+      return null;
     }
 
     function markFile(i, state, extra) {
@@ -127,8 +137,8 @@
       const stateEl = li.querySelector('.photo-file-state');
       if (!stateEl) return;
       if (state === 'uploading') {
-        stateEl.innerHTML = '<span class="has-text-info">caricamento…' +
-          (extra ? ' (' + escapeHtml(extra) + ')' : '') + '</span>';
+        stateEl.innerHTML = '<span class="has-text-info">' +
+          escapeHtml(extra || 'caricamento…') + '</span>';
       } else if (state === 'ok') {
         stateEl.innerHTML = '<span class="has-text-success">ok</span>';
       } else if (state === 'error') {
@@ -138,21 +148,22 @@
     }
 
     async function uploadOne(file, i) {
-      if (file.size > MAX_FILE_SIZE) {
-        throw new Error('oltre ' + MAX_FILE_SIZE_MB + ' MB');
-      }
-      markFile(i, 'uploading');
-      const base64 = await fileToBase64(file);
+      const over = fileOverLimit(file);
+      if (over) throw new Error(over);
 
       let lastErr;
-      for (let attempt = 0; attempt <= UPLOAD_RETRIES; attempt++) {
+      for (let attempt = 0; attempt <= SESSION_RETRIES; attempt++) {
         if (attempt > 0) {
-          const delay = UPLOAD_RETRY_DELAYS_MS[attempt - 1] || 5000;
-          markFile(i, 'uploading', 'tentativo ' + (attempt + 1));
-          await sleep(delay);
+          markFile(i, 'uploading', 'ritento (' + (attempt + 1) + ')');
+          await sleep(RETRY_BASE_DELAY_MS * attempt);
         }
         try {
-          await postToAppsScript(file, base64);
+          markFile(i, 'uploading', 'preparo…');
+          const sessionUri = await createSession(file);
+          await putToSession(sessionUri, file, function (loaded, tot) {
+            const pct = tot ? Math.floor(loaded * 100 / tot) : 0;
+            markFile(i, 'uploading', pct + '%');
+          });
           markFile(i, 'ok');
           return;
         } catch (err) {
@@ -162,47 +173,61 @@
       throw lastErr || new Error('errore sconosciuto');
     }
 
-    async function postToAppsScript(file, base64) {
-      // FormData (multipart/form-data) evita il preflight CORS
-      // e Apps Script legge i campi da e.parameter.
+    async function createSession(file) {
       const body = new FormData();
+      body.append('action', 'createSession');
       body.append('filename', file.name);
       body.append('mimeType', file.type || 'application/octet-stream');
-      body.append('data', base64);
+      body.append('size', String(file.size));
 
       const res = await fetch(PHOTO_UPLOAD_URL, {
         method: 'POST',
         body: body,
         redirect: 'follow',
       });
-      if (!res.ok) throw new Error('HTTP ' + res.status);
+      if (!res.ok) throw new Error('init HTTP ' + res.status);
       const text = await res.text();
-      let json;
+      let payload;
       try {
-        json = JSON.parse(text);
+        payload = JSON.parse(text);
       } catch (e) {
-        throw new Error('risposta non valida');
+        throw new Error('risposta init non valida');
       }
-      if (json.result !== 'ok') throw new Error(json.message || 'errore server');
+      if (payload.result !== 'ok') throw new Error(payload.message || 'init server error');
+      if (!payload.sessionUri) throw new Error('sessione mancante');
+      return payload.sessionUri;
+    }
+
+    function putToSession(sessionUri, file, onProgress) {
+      return new Promise(function (resolve, reject) {
+        const xhr = new XMLHttpRequest();
+        xhr.open('PUT', sessionUri, true);
+        xhr.setRequestHeader('Content-Type', file.type || 'application/octet-stream');
+        xhr.upload.onprogress = function (e) {
+          if (e.lengthComputable && onProgress) onProgress(e.loaded, e.total);
+        };
+        xhr.onload = function () {
+          if (xhr.status === 200 || xhr.status === 201) {
+            resolve();
+          } else {
+            reject(new Error('upload HTTP ' + xhr.status));
+          }
+        };
+        xhr.onerror = function () { reject(new Error('errore di rete')); };
+        xhr.onabort = function () { reject(new Error('interrotto')); };
+        xhr.ontimeout = function () { reject(new Error('timeout')); };
+        xhr.send(file);
+      });
     }
 
     function sleep(ms) {
       return new Promise(function (resolve) { setTimeout(resolve, ms); });
     }
 
-    function fileToBase64(file) {
-      return new Promise(function (resolve, reject) {
-        const reader = new FileReader();
-        reader.onload = function () {
-          const result = String(reader.result || '');
-          const comma = result.indexOf(',');
-          resolve(comma >= 0 ? result.slice(comma + 1) : '');
-        };
-        reader.onerror = function () {
-          reject(reader.error || new Error('lettura file fallita'));
-        };
-        reader.readAsDataURL(file);
-      });
+    function formatSize(bytes) {
+      if (bytes >= 1024 * 1024 * 1024) return (bytes / (1024 * 1024 * 1024)).toFixed(2) + '&nbsp;GB';
+      if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(1) + '&nbsp;MB';
+      return Math.max(1, Math.round(bytes / 1024)) + '&nbsp;KB';
     }
 
     function escapeHtml(s) {
