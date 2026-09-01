@@ -179,6 +179,7 @@
       body.append('filename', file.name);
       body.append('mimeType', file.type || 'application/octet-stream');
       body.append('size', String(file.size));
+      body.append('origin', window.location.origin);
 
       const res = await fetch(PHOTO_UPLOAD_URL, {
         method: 'POST',
