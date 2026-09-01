@@ -4,7 +4,12 @@
   const PHOTO_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbyQFzorPHx7oLkm19Ptcfg7jtn6jRCRoYN5_jogNiAh-ZA2bc4UAfRiwQE7TcvjrG9r/exec';
 
   const MAX_FILES = 100;
-  const MAX_CONCURRENT = 3;
+  // Concorrenza adattiva: molte connessioni parallele per foto/file piccoli
+  // (dove il collo di bottiglia è il round-trip di init sessione), meno se
+  // ci sono video pesanti (dove il collo di bottiglia è la banda in upload).
+  const MAX_CONCURRENT_SMALL = 6;   // file <= 20 MB (foto tipiche)
+  const MAX_CONCURRENT_LARGE = 2;   // file > 20 MB (video)
+  const LARGE_FILE_THRESHOLD = 20 * 1024 * 1024;
   const MAX_PHOTO_BYTES = 50 * 1024 * 1024;              // 50 MB
   const MAX_VIDEO_BYTES = 3 * 1024 * 1024 * 1024;        // 3 GB
   const SESSION_RETRIES = 2;                              // tentativi extra per file
@@ -71,26 +76,39 @@
       };
       updateStatus();
 
-      const queue = selected.map((file, i) => ({ file, i }));
-      const workerCount = Math.min(MAX_CONCURRENT, queue.length);
-      const workers = [];
-      for (let w = 0; w < workerCount; w++) {
-        workers.push((async function worker() {
-          while (queue.length) {
-            const item = queue.shift();
-            if (!item) return;
-            try {
-              await uploadOne(item.file, item.i);
-              done++;
-            } catch (err) {
-              failed++;
-              markFile(item.i, 'error', (err && err.message) || 'errore');
+      const smallQueue = [];
+      const largeQueue = [];
+      selected.forEach((file, i) => {
+        (file.size > LARGE_FILE_THRESHOLD ? largeQueue : smallQueue)
+          .push({ file, i });
+      });
+
+      const runPool = (queue, poolSize) => {
+        const workers = [];
+        const n = Math.min(poolSize, queue.length);
+        for (let w = 0; w < n; w++) {
+          workers.push((async function worker() {
+            while (queue.length) {
+              const item = queue.shift();
+              if (!item) return;
+              try {
+                await uploadOne(item.file, item.i);
+                done++;
+              } catch (err) {
+                failed++;
+                markFile(item.i, 'error', (err && err.message) || 'errore');
+              }
+              updateStatus();
             }
-            updateStatus();
-          }
-        })());
-      }
-      await Promise.all(workers);
+          })());
+        }
+        return Promise.all(workers);
+      };
+
+      await Promise.all([
+        runPool(smallQueue, MAX_CONCURRENT_SMALL),
+        runPool(largeQueue, MAX_CONCURRENT_LARGE),
+      ]);
 
       statusEl.innerHTML = failed === 0
         ? '<span class="has-text-success"><strong>Fatto!</strong> ' + done + ' file caricati.</span>'
