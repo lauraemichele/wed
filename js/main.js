@@ -111,7 +111,7 @@ function getQueryParam(name) {
 
 function isWeddingWindowDay() {
   const today = new Date();
-  const weddingCutoff = new Date(2026, 8, 26, 18, 0, 0);
+  const weddingCutoff = new Date(2026, 8, 25, 18, 0, 0);
   return today.getTime() >= weddingCutoff.getTime();
 }
 
