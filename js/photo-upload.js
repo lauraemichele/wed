@@ -14,6 +14,7 @@
   const MAX_VIDEO_BYTES = 3 * 1024 * 1024 * 1024;        // 3 GB
   const SESSION_RETRIES = 2;                              // tentativi extra per file
   const RETRY_BASE_DELAY_MS = 1500;
+  const SESSION_BATCH_SIZE = 15;                          // sessioni create per singola POST
 
   document.addEventListener('DOMContentLoaded', function () {
     const uploader = document.getElementById('photo-uploader');
@@ -76,6 +77,46 @@
       };
       updateStatus();
 
+      // Deferred promise per file: risolta quando arriva il session URI dal batch.
+      // I file oversize non entrano nella mappa; uploadOne li scarta senza attendere.
+      const sessionPromises = new Map();
+      const deferreds = new Map();
+      const eligible = [];
+      selected.forEach((file, i) => {
+        if (fileOverLimit(file)) return;
+        let resolveFn, rejectFn;
+        const p = new Promise((r, j) => { resolveFn = r; rejectFn = j; });
+        sessionPromises.set(i, p);
+        deferreds.set(i, { resolve: resolveFn, reject: rejectFn });
+        eligible.push({ file, i });
+      });
+      // Evita "unhandled rejection" se un worker fallisce prima di await.
+      sessionPromises.forEach(p => p.catch(() => {}));
+
+      // Batch di creazione sessioni, tutti in parallelo verso Apps Script.
+      const batches = [];
+      for (let i = 0; i < eligible.length; i += SESSION_BATCH_SIZE) {
+        batches.push(eligible.slice(i, i + SESSION_BATCH_SIZE));
+      }
+      batches.forEach(batch => {
+        (async () => {
+          try {
+            const sessions = await createSessionsBatch(batch);
+            batch.forEach((item, k) => {
+              const d = deferreds.get(item.i);
+              const s = sessions && sessions[k];
+              if (s && s.ok && s.sessionUri) d.resolve(s.sessionUri);
+              else d.reject(new Error((s && s.message) || 'sessione non ottenuta'));
+            });
+          } catch (err) {
+            batch.forEach(item => {
+              const d = deferreds.get(item.i);
+              if (d) d.reject(err);
+            });
+          }
+        })();
+      });
+
       const smallQueue = [];
       const largeQueue = [];
       selected.forEach((file, i) => {
@@ -92,7 +133,7 @@
               const item = queue.shift();
               if (!item) return;
               try {
-                await uploadOne(item.file, item.i);
+                await uploadOne(item.file, item.i, sessionPromises);
                 done++;
               } catch (err) {
                 failed++;
@@ -165,7 +206,7 @@
       }
     }
 
-    async function uploadOne(file, i) {
+    async function uploadOne(file, i, sessionPromises) {
       const over = fileOverLimit(file);
       if (over) throw new Error(over);
 
@@ -176,8 +217,12 @@
           await sleep(RETRY_BASE_DELAY_MS * attempt);
         }
         try {
-          markFile(i, 'uploading', 'preparo…');
-          const sessionUri = await createSession(file);
+          markFile(i, 'uploading', 'attesa sessione…');
+          // Primo tentativo: usa la sessione pre-fetchata dal batch.
+          // Retry: ricrea la singola sessione (fresh URI = più robusto).
+          const sessionUri = (attempt === 0 && sessionPromises && sessionPromises.has(i))
+            ? await sessionPromises.get(i)
+            : await createSessionSingle(file);
           await putToSession(sessionUri, file, function (loaded, tot) {
             const pct = tot ? Math.floor(loaded * 100 / tot) : 0;
             markFile(i, 'uploading', pct + '%');
@@ -191,7 +236,37 @@
       throw lastErr || new Error('errore sconosciuto');
     }
 
-    async function createSession(file) {
+    async function createSessionsBatch(items) {
+      const body = new FormData();
+      body.append('action', 'createSessions');
+      body.append('origin', window.location.origin);
+      body.append('files', JSON.stringify(items.map(function (x) {
+        return {
+          filename: x.file.name,
+          mimeType: x.file.type || 'application/octet-stream',
+          size: x.file.size,
+        };
+      })));
+
+      const res = await fetch(PHOTO_UPLOAD_URL, {
+        method: 'POST',
+        body: body,
+        redirect: 'follow',
+      });
+      if (!res.ok) throw new Error('batch HTTP ' + res.status);
+      const text = await res.text();
+      let payload;
+      try {
+        payload = JSON.parse(text);
+      } catch (e) {
+        throw new Error('risposta batch non valida');
+      }
+      if (payload.result !== 'ok') throw new Error(payload.message || 'batch server error');
+      if (!Array.isArray(payload.sessions)) throw new Error('sessions mancanti');
+      return payload.sessions;
+    }
+
+    async function createSessionSingle(file) {
       const body = new FormData();
       body.append('action', 'createSession');
       body.append('filename', file.name);
